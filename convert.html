@@ -126,6 +126,7 @@
             //$('div.middle').hide();
             //$('div.bottom').hide();
             $('div.hddn').show();
+            $('#mergely').width(1700);
             $('#compare').mergely('lhs', $('#inputarea').val());
             $('#compare').mergely('rhs', $('#outputarea').val());
             $('#compare-editor-lhs').width(800);
@@ -140,7 +141,6 @@
         });
 
         $('#compare').mergely({
-            height:'300',
             cmsettings: { readOnly: true, lineWrapping: true,lineNumbers: true }
         });
 
