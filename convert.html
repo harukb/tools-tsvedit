@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>csv/tsv utility</title>
+
+
+    <style type="text/css">
+
+        div.top {
+            float: left;
+            width: 70%;
+            padding: 5px;
+            margin: 0px 5px 5px 0px;
+        }
+        div.middle {
+            float: left;
+            width: 90%;
+            hight: 200px;
+            padding: 5px;
+            margin: 0px 5px 5px 0px;
+        }
+        div.bottom {
+            float: left;
+            width: 90%;
+            padding: 5px;
+            margin: 0px 5px 5px 0px;
+        }
+        div.hddn {
+            float: left;
+            width: 90%;
+            padding: 5px;
+            margin: 0px 5px 5px 0px;
+        }
+        .clear { clear:both; }
+        .clear hr { display:none; }
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <!--
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    -->
+    <![endif]-->
+</head>
+<body>
+<h3>csv/tsv utility</h3>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<!-- Bootstrap -->
+<script src="lib/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+<link href="lib/bootstrap-3.2.0-dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- handsonTable-->
+<script data-jsfiddle="common" src="lib/jquery-handsontable-0.11.4/dist/jquery.handsontable.full.js"></script>
+<link data-jsfiddle="common" rel="stylesheet" media="screen"
+      href="lib/jquery-handsontable-0.11.4/dist/jquery.handsontable.full.css">
+<!-- mergely-->
+<script type="text/javascript" src="lib/mergely-3.3.8/lib/codemirror.min.js"></script>
+<link type="text/css" rel="stylesheet" href="lib/mergely-3.3.8/lib/codemirror.css" />
+<script type="text/javascript" src="lib/mergely-3.3.8/lib/mergely.js"></script>
+<link type="text/css" rel="stylesheet" href="lib/mergely-3.3.8/lib/mergely.css" />
+<script type="text/javascript">
+    $(document).ready(function () {
+        //table data
+        var records = [];
+        var $container = $("#myData");
+
+        //diff areaを隠す
+        $('div.hddn').hide();
+
+        function reRender() {
+            $container.handsontable({
+                data:records
+            });
+            $container.handsontable('render'); //refresh the grid to display the new value
+        };
+
+        $('#text_to_sheet').click(function () {
+            //tbodyをリセットする
+            records = [];
+            var org_value = $('#inputarea').val();
+            var type = $('#delimittype').val();
+            var dlmtobj = { csv:',', tsv:'\t' };
+            var dlmtval = dlmtobj[type];
+            var text = $('#inputarea').val();
+            var lines = text.split('\n');
+            for (var i = 0; i < lines.length ; i++) {
+                var element = lines[i].split(dlmtval);
+                //var maxcnt = 0;
+                //tdsizeが異なる場合には空セル追加
+                //if (element.length < maxcnt){
+                //    for (var k = 0;k < maxcnt-element.length;k++){
+                //        //do something
+                //    }
+                //maxcnt = element.length;
+                //}
+                records.push(element);
+            }
+            ;
+            reRender();
+        });
+
+        $('#sheet_to_text').click(function () {
+            var update_records = $container.handsontable('getData');
+            var type = $('#delimittype').val();
+            var dlmtobj = { csv:',', tsv:'\t' };
+            var dlmtval = dlmtobj[type];
+            var update_value = '';
+            for (var i = 0; i < update_records.length; i++) {
+                var line_arr = update_records[i];
+                var line_str = line_arr.join(dlmtval);
+                console.log(i+":"+ update_records.length);
+                update_value = update_value + line_str + (i < update_records.length -1 ? '\n':'');
+            }
+            $('#outputarea').val(update_value);
+        });
+
+        $('#showdiff').click(function () {
+            //$('div.top').hide();
+            //$('div.middle').hide();
+            //$('div.bottom').hide();
+            $('div.hddn').show();
+            $('#compare').mergely('lhs', $('#inputarea').val());
+            $('#compare').mergely('rhs', $('#outputarea').val());
+            $('#compare-editor-lhs').width(800);
+            $('#compare-editor-rhs').width(800);
+        });
+
+        $('#hidediff').click(function () {
+            //$('div.top').show();
+            //$('div.middle').show();
+            //$('div.bottom').show();
+            $('div.hddn').hide();
+        });
+
+        $('#compare').mergely({
+            height:'300',
+            cmsettings: { readOnly: true, lineWrapping: true,lineNumbers: true }
+        });
+
+    });
+</script>
+
+<div class="top">
+    <select id="delimittype">
+        <option value="csv">csv</option>
+        <option value="tsv">tsv</option>
+    </select>
+    <div >
+        <textarea id="inputarea" cols="150" rows="10" wrap="off">ここに,値を,入れる</textarea>
+    </div>
+    <input type="button" id="text_to_sheet" value="changes to spreadsheet"/>
+</div>
+
+<div class="middle">
+    <div class="first_content">
+        <div id="myData" style="height: 300px; overflow: auto"></div>
+    </div>
+    <input type="button" id="sheet_to_text" value="changes to text"/>
+</div>
+
+<div class="bottom">
+    <div >
+        <textarea id="outputarea" cols="150" rows="10" wrap="off">ここに,値が,出る</textarea>
+    </div>
+    <input type="button" id="showdiff" value="diff"/>
+</div>
+
+<div id="mergely" class="hddn">
+    <div id="compare">
+    </div>
+</div>
+<div class="hddn">
+    <input type="button" id="hidediff" value="hide diff"/>
+</div>
+
+</body>
+</html>
+
